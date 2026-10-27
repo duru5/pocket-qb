@@ -2,7 +2,7 @@
    "first read" throws the progression's first receiver at the top of the drop;
    "best at the top" throws the best option at the top of the drop (a sharp QB);
    "oracle" is the best throw at any moment (perfect information). */
-const path = "/home/claude/pocket/";
+const path = "/home/claude/pocket-qb/";
 const B = require(path + "playbook.js"), RP = require(path + "rep.js"), P = require(path + "play.js");
 const PASS = B.CONCEPTS.filter(c => c.kind !== "run").map(c => c.id);
 const st = { first: { n: 0, k: {}, epa: 0 }, top: { n: 0, epa: 0, comp: 0 }, oracle: { n: 0, epa: 0 } };

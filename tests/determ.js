@@ -1,5 +1,5 @@
 /* the same snap played the same way gives the same result, every time */
-const path = "/home/claude/pocket/";
+const path = "/home/claude/pocket-qb/";
 const B = require(path + "playbook.js"), RP = require(path + "rep.js"), P = require(path + "play.js");
 const PASS = B.CONCEPTS.filter(c => c.kind !== "run").map(c => c.id);
 let n = 0, same = 0, bad = [];

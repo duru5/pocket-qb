@@ -592,7 +592,7 @@
     }
   };
 
-  const VIEWS = ["play", "book", "install", "progress"];
+  const VIEWS = ["play", "study", "book", "install", "progress"];
   let view = "play";
   function setView(v) {
     view = v;
@@ -602,7 +602,10 @@
     if (v === "install") { refreshSetup(); quizField.resize(); }
     if (v === "progress") renderProgress();
     if (v === "book") bookField.resize();
+    if (v === "study" && window.PocketStudy) window.PocketStudy.onShow();
+    try { history.replaceState(null, "", "#" + v); } catch (e) { }
   }
+  window.PocketApp = { setView: v => setView(v) };
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => setView(t.dataset.view)));
 
   let last = 0;

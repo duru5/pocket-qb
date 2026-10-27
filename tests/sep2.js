@@ -2,7 +2,7 @@
    arrives, defenders breaking on the throw) for every receiver, thrown fast at times from
    0.4 s before to 0.6 s after the top of the drop. Reports the most-open option per play
    (what a perfect reader gets) and per-receiver separation, by coverage and by route. */
-const path = "/home/claude/pocket/";
+const path = "/home/claude/pocket-qb/";
 const B = require(path + "playbook.js"), RP = require(path + "rep.js"), P = require(path + "play.js"), D = require(path + "defense.js"), E = require(path + "engine.js");
 const PASS = B.CONCEPTS.filter(c => c.kind !== "run").map(c => c.id);
 const N = +(process.argv[2] || 300);

@@ -1,7 +1,7 @@
 /* concept x coverage: value of the best throw within 0.3 s of the top of the drop (a sharp
    reader, no dice), against each coverage played straight (no disguise, nickel, 1st & 10 at midfield).
    Checks that each concept does better against the coverages it is built to beat. */
-const path = "/home/claude/pocket/";
+const path = "/home/claude/pocket-qb/";
 const B = require(path + "playbook.js"), RP = require(path + "rep.js"), P = require(path + "play.js"), D = require(path + "defense.js");
 const COVS = ["c0", "c1", "c3sky", "c3buzz", "fire", "c2", "tampa2", "m2", "c4", "c6"];
 const FAM = { c3sky: "c3", c3buzz: "c3", fire: "c3" };

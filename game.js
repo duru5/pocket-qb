@@ -108,17 +108,33 @@
 
   /* ---------- rep lifecycle ---------- */
   let G = null, GM = null, lastPhase = null, between = null;
+  /* a drill from the Study tab: single snaps against a slice of the NFL call
+     sheet (coverage family, shell, situation), with the plays the lesson names */
+  let drill = null;
+  function drillSit(bucket) {
+    const pool = CAL.sits.filter(([down, togo, yl]) => P.sitBucket({ down, togo: Math.max(1, Math.min(togo, yl)), yl }) === bucket);
+    const [down, togo, yl] = pool.length ? pool[Math.floor(Math.random() * pool.length)] : CAL.sits[0];
+    return { down, togo: Math.max(1, Math.min(togo, yl)), yl };
+  }
   function flash(text, tone) { if (G) G.msg = { text, tone: tone || "", until: performance.now() + 900 }; }
   function startSession() {
     GM = null;
-    if (S.mode !== "snaps") { GM = DR.newGame(S.mode); GM.coord = P.coordinator(); GM.team = S.team || null; }
+    if (S.mode !== "snaps" && !drill) { GM = DR.newGame(S.mode); GM.coord = P.coordinator(); GM.team = S.team || null; }
     newRep();
   }
   function newRep() {
     between = null;
     const opts = { personnel: S.pers, team: S.team || null };
     if (GM) { opts.sit = DR.sitFor(GM); opts.coord = GM.coord; }
-    G = new RP.Rep(S.level, unlocked(S.level), opts);
+    let ids = unlocked(S.level);
+    if (drill) {
+      if (drill.pers) opts.personnel = drill.pers;
+      if (drill.ids) ids = drill.ids.slice();
+      if (drill.sit) opts.sit = drillSit(drill.sit);
+      opts.rep = window.PocketLab.repFor(S.level, { sit: opts.sit, personnel: opts.personnel, team: opts.team, covs: drill.covs, deep: drill.deep });
+      drill.n++;
+    }
+    G = new RP.Rep(S.level, ids, opts);
     G.onFlash = flash;
     G.replay = { i: 0, playing: false, acc: 0 }; G.heat = false; G.heatCache = null; G.msg = null; G.scored = false;
     camTop = CAM_MIN; ptrs.clear();
@@ -127,7 +143,9 @@
     renderTop(); sync(); resize();
   }
   function endSession() {
-    G = null; GM = null; between = null; ptrs.clear();
+    if (drill && window.PocketStudy) window.PocketStudy.drillDone(drill);
+    if (drill && drill.prevLevel) { S.level = drill.prevLevel; saveS(); }
+    G = null; GM = null; between = null; drill = null; ptrs.clear();
     $("playRep").hidden = true; $("playSetup").hidden = false;
     exitImmersive(); renderSetup();
   }
@@ -153,6 +171,7 @@
       if (GM.over) { S.games++; if (GM.result === "win" || GM.result === "td") S.wins++; else if (GM.result === "loss" || GM.result === "none") S.losses++; else S.ties++; }
     }
     saveS();
+    if (drill) { drill.reps.push({ kind: R.kind, epa: R.epa, idOk: !!(R.id && R.id.cov === r.cov), cov: r.cov, gap: R.oracle && R.oracle.overall ? Math.max(0, R.oracle.overall.best.ev - R.yourEV) : null }); }
     G.replay = { i: G.releaseFrameIndex(), playing: false, acc: 0 };
     G.heatCache = null;
   }
@@ -477,7 +496,7 @@
   function renderTop() {
     if (G) $("pSit").textContent = P.sitLabel(G.rep.sit);
     else if (GM) $("pSit").textContent = GM.over ? "Final" : P.sitLabel(DR.sitFor(GM));
-    $("pLevel").textContent = `Level ${S.level} · ${P.LEVELS[S.level].label}`;
+    $("pLevel").textContent = drill ? `Drill · ${drill.name} · ${drill.n}` : `Level ${S.level} · ${P.LEVELS[S.level].label}`;
     renderBoard();
   }
   /* the scoreboard strip: score, quarter, game clock, timeouts */
@@ -838,7 +857,16 @@
     const c = Math.max(0, GM.clock - (P.PLAY_CLOCK - G.clock));
     q.innerHTML = `Q${GM.q} ${DR.fmtClock(c)} <i class="run">▶</i>`;
   }
-  window.PocketGame = { onShow() { renderSetup(); resize(); }, state: () => G, game: () => GM, cam: () => camTop };
+  window.PocketGame = { onShow() { renderSetup(); resize(); }, state: () => G, game: () => GM, cam: () => camTop,
+    /* d: {name, covs?, deep?, ids?, pers?, sit?, level?} */
+    drill(d) {
+      if (G || GM) endSession();
+      if (d.mode) { S.mode = d.mode; saveS(); renderSetup(); enterImmersive(); startSession(); return; }
+      drill = Object.assign({ n: 0, reps: [] }, d);
+      if (d.level && P.LEVELS[d.level]) { drill.prevLevel = S.level; S.level = d.level; }
+      enterImmersive(); startSession();
+    },
+    drillState: () => drill };
   renderSetup();
   requestAnimationFrame(loop);
 })();

@@ -98,7 +98,9 @@
       Z("half-l", "Deep half L", 14.5, 18.5), Z("half-r", "Deep half R", 39.0, 18.5),
       Z("flat-l", "Flat L", 7.5, 5.0), Z("flat-r", "Flat R", 46.0, 5.0),
       Z("hook-w", "Hook weak", 19.0, 10.5), Z("hook-m", "Hook middle", 26.7, 11.0), Z("hook-s", "Hook strong", 33.5, 10.5)] },
-    tampa2: { label: "Tampa 2", fam: "tampa2", deep: 2, shells: ["two"], zones: [
+    /* the Mike runs the pipe: the middle linebacker if there is one, else the
+       inside linebacker left in the package (pinAny takes the first one present) */
+    tampa2: { label: "Tampa 2", fam: "tampa2", deep: 2, shells: ["two"], pinAny: [["pipe", ["MLB", "WLB", "SLB"]]], zones: [
       Z("half-l", "Deep half L", 12.5, 19.5), Z("half-r", "Deep half R", 41.0, 19.5),
       Z("flat-l", "Flat L", 7.5, 5.0), Z("flat-r", "Flat R", 46.0, 5.0),
       Z("hook-w", "Hook weak", 18.0, 10.5), Z("pipe", "Deep hole (pipe)", 26.7, 20.0), Z("hook-s", "Hook strong", 33.5, 10.5)] },
@@ -345,6 +347,11 @@
       if (!zoneP.find(p => p.id === id)) continue;
       const zi = zones.findIndex(z => z.key === D.cov.pin[id]);
       if (zi >= 0) fixed[id] = zi;
+    }
+    for (const [zk, ids] of (D.cov.pinAny || [])) {
+      const zi = zones.findIndex(z => z.key === zk);
+      const id = ids.find(i => zoneP.find(p => p.id === i) && !(i in fixed));
+      if (zi >= 0 && id && !Object.values(fixed).includes(zi)) fixed[id] = zi;
     }
     const takenZ = new Set(Object.values(fixed));
     const freeP = zoneP.filter(p => !(p.id in fixed));

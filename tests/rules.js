@@ -1,5 +1,5 @@
 /* trace the match rules on classic matchups: who each zone defender has, and how */
-const path = "/home/claude/pocket/";
+const path = "/home/claude/pocket-qb/";
 const RP = require(path + "rep.js"), P = require(path + "play.js"), D = require(path + "defense.js");
 const cases = [["mills", "c4"], ["smash", "c2"], ["flood", "c3sky"], ["verts", "c3buzz"], ["verts", "tampa2"], ["dagger", "c3sky"], ["stick", "c4"], ["levels", "fire"]];
 for (const [cid, cov] of cases) {

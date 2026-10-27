@@ -1,4 +1,4 @@
-const path = "/home/claude/pocket/";
+const path = "/home/claude/pocket-qb/";
 const B = require(path + "playbook.js"), RP = require(path + "rep.js"), CAL = require(path + "calib.js");
 const ALL = B.CONCEPTS.map(c => c.id);
 const by = {}; let N = 0, Y = 0, ten = 0, neg = 0, stuff = 0;

@@ -1,5 +1,5 @@
 /* drive.js invariants with synthetic play results (fast): 20k games per mode */
-const DR = require("/home/claude/pocket/drive.js");
+const DR = require("/home/claude/pocket-qb/drive.js");
 let checks = 0, fails = 0; const log = [];
 const ok = (c, m, x) => { checks++; if (!c) { fails++; if (log.length < 20) log.push(m + " " + JSON.stringify(x)); } };
 const KINDS = ["complete", "incomplete", "run", "sack", "int", "throwaway", "delay"];
