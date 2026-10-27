@@ -5,7 +5,7 @@
 (function () {
   "use strict";
   const E = window.PocketEngine, B = window.PocketBook, D = window.PocketDefense, P = window.PocketPlay;
-  const LAB = window.PocketLab, CAL = window.PocketCalib, SC = window.PocketStudyContent;
+  const LAB = window.PocketLab, CAL = window.PocketCalib, SC = window.PocketStudyContent, KC = window.PocketCoaches;
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
   const pct = (v, d = 0) => (100 * v).toFixed(d) + "%";
@@ -36,7 +36,7 @@
 
   /* ---------- progress (this browser only) ---------- */
   const KEY = "pocket.study.v1";
-  const blank = () => ({ done: {}, checks: {}, reps: { shell: { n: 0, ok: 0 }, cov: { n: 0, ok: 0, fam: 0 }, thr: { n: 0, ok: 0, gap: 0 } }, drills: {}, last: null, days: [], lensOpen: true });
+  const blank = () => ({ done: {}, checks: {}, reps: { shell: { n: 0, ok: 0 }, cov: { n: 0, ok: 0, fam: 0 }, thr: { n: 0, ok: 0, gap: 0 } }, drills: {}, last: null, days: [], coach: null });
   let ST = blank();
   try { const r = localStorage.getItem(KEY); if (r) { const o = JSON.parse(r); ST = Object.assign(blank(), o); ST.reps = Object.assign(blank().reps, o.reps || {}); } } catch (e) { }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch (e) { } };
@@ -435,7 +435,8 @@
   setInterval(() => { for (const b of BOARDS) if (b.hl && !b.playing && b.el.isConnected && b.F) b.draw(); }, 120);
 
   /* ================= blocks ================= */
-  const lensChip = k => `<span class="lens-chip lens-${k}">${esc(SC.LENSES[k].name)}</span>`;
+  const coachOn = () => ST.coach && KC.BYID[ST.coach] ? KC.BYID[ST.coach] : null;
+  const SIDE = { offense: "Offense", defense: "Defense", program: "Program" }, LVL = { nfl: "NFL", college: "College", both: "NFL and college" };
   function blockEl(b, l, i) {
     const key = l ? l.id + ":" + i : null;
     const div = document.createElement("div");
@@ -444,7 +445,6 @@
     if (b.list) { div.innerHTML = `<ul class="st-list">${b.list.map(x => `<li>${x}</li>`).join("")}</ul>`; return div.firstChild; }
     if (b.note) { div.innerHTML = `<p class="st-note">${b.note}</p>`; return div.firstChild; }
     if (b.key) { div.innerHTML = `<div class="st-key"><span class="lab">Coaching point</span><p>${b.key}</p></div>`; return div.firstChild; }
-    if (b.lens) { div.innerHTML = `<div class="st-lens lens-${b.lens}"><span class="lab">${esc(SC.LENSES[b.lens].name)} · ${esc(SC.LENSES[b.lens].coach)}</span><p>${b.html}</p></div>`; return div.firstChild; }
     if (b.table) {
       div.innerHTML = `<div class="tblwrap st-tbl"><table class="timing"><thead><tr>${b.table.head.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${b.table.rows.map(r => `<tr>${r.map((c, j) => `<td${j === 0 ? ' class="k"' : ""}>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
       return div.firstChild;
@@ -857,7 +857,7 @@
       el.querySelectorAll(".rt-h").forEach(b => b.onclick = () => { const p = b.nextElementSibling; p.hidden = !p.hidden; b.setAttribute("aria-expanded", !p.hidden); });
     },
     week(el) {
-      el.innerHTML = `<div class="week">${SC.WEEK.map(d => `<div class="wday"><div class="wd"><b>${d.day}</b>${lensChip(d.lens)}</div><div class="wf">${esc(d.focus)}</div><div class="wi">${d.items.map(([k, n]) => `<button class="witem" data-k="${k}" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>`).join("")}</div>`;
+      el.innerHTML = `<div class="week">${SC.WEEK.map(d => `<div class="wday"><div class="wd"><b>${d.day}</b></div><div class="wf">${esc(d.focus)}</div><div class="wi">${d.items.map(([k, n]) => `<button class="witem" data-k="${k}" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>`).join("")}</div>`;
       el.onclick = e => {
         const b = e.target.closest(".witem"); if (!b) return;
         const k = b.dataset.k, n = b.dataset.n;
@@ -890,6 +890,8 @@
     if (v.view === "lesson") renderLesson(r, LBYID[v.id] || LESSONS[0]);
     else if (v.view === "film") renderFilm(r);
     else if (v.view === "reps") renderReps(r, v.mode);
+    else if (v.view === "coaches") renderCoaches(r);
+    else if (v.view === "coach") renderCoach(r, v.id);
     else renderHome(r);
     if (v.view !== "home") window.scrollTo({ top: 0 });
   }
@@ -917,17 +919,68 @@
           <button class="tool" data-film><b>Film room</b><span>Any play, any coverage</span></button>
         </div>
       </div>
-      <details class="st-lenses panel" ${ST.lensOpen ? "open" : ""}>
-        <summary><span class="h3">Three coaching lenses</span><span class="hint">How the plan is built</span></summary>
-        <div class="lensgrid">${Object.entries(SC.LENSES).map(([k, L]) => `<div class="lenscard lens-${k}"><span class="lab">${esc(L.coach)}</span><b>${esc(L.name)}</b><i>${esc(L.tag)}</i>${L.html}</div>`).join("")}</div>
-        <p class="foot">${esc(SC.LENS_NOTE)}</p>
-      </details>
+      ${coachCard()}
       <div class="st-phases">${SC.PHASES.map(ph => { const p = phaseProgress(ph); return `
         <div class="phase panel">
-          <div class="ph-h"><span class="ph-n">${ph.n}</span><div><b>${esc(ph.title)}</b>${lensChip(ph.lens)}<p>${esc(ph.goal)}</p></div><span class="ph-p">${p.d}/${p.n}</span></div>
-          <div class="ph-l">${ph.lessons.map(l => { const s = lessonState(l); return `<button class="lrow ${s}" data-open="${l.id}"><span class="dot"></span><span class="lt">${esc(l.title)}</span><span class="lm">${l.mins} min</span></button>`; }).join("")}</div>
+          <div class="ph-h"><span class="ph-n">${ph.n}</span><div><b>${esc(ph.title)}</b><p>${esc(ph.goal)}</p></div><span class="ph-p">${p.d}/${p.n}</span></div>
+          <div class="ph-l">${ph.lessons.map(l => { const s = lessonState(l); return `<button class="lrow ${s}" data-open="${l.id}"><span class="dot"></span><span class="lt">${esc(l.title)}${coachOn() && coachOn().notes[l.id] ? ` <span class="cmark" title="${esc(coachOn().name)} has a note here">${esc(initials(coachOn().name))}</span>` : ""}</span><span class="lm">${l.mins} min</span></button>`; }).join("")}</div>
         </div>`; }).join("")}</div>`;
-    const det = r.querySelector(".st-lenses"); det.addEventListener("toggle", () => { ST.lensOpen = det.open; save(); });
+  }
+  const initials = n => n.split(/\s+/).filter(w => /^[A-Z]/.test(w)).map(w => w[0]).join("").slice(0, 3);
+  function coachCard() {
+    const c = coachOn();
+    if (!c) return `<div class="st-coach panel"><div class="pbody"><span class="lab">Coach's lens</span><b>Off</b>
+      <p class="note">Step into one of 50 coaches' approach to scheming and teaching. His notes appear only in the lessons where he has something to say; the concepts stay the same.</p>
+      <button class="ghost" data-coaches>Choose a coach</button></div></div>`;
+    const n = Object.keys(c.notes).length;
+    return `<div class="st-coach panel on"><div class="pbody"><span class="lab">Coach's lens · ${SIDE[c.side]} · ${LVL[c.lvl]}</span><b>${esc(c.name)}</b>
+      <p class="note">${esc(c.known)}</p><p class="hint">Notes in ${n} lesson${n === 1 ? "" : "s"}, marked ${esc(initials(c.name))} below.</p>
+      <div class="resbtns"><button class="ghost" data-coach="${c.id}">His page</button><button class="ghost" data-coaches>Change</button><button class="ghost" data-lensoff>Turn off</button></div></div></div>`;
+  }
+  function lessonCoach(l) {
+    const c = coachOn();
+    if (!c) return "";
+    const t = c.notes[l.id];
+    if (!t) return "";
+    return `<div class="st-cnote"><span class="lab">Through ${esc(c.name)}'s lens <button class="linkbtn" data-coach="${c.id}">his page</button></span><p>${esc(t)}</p></div>`;
+  }
+  function renderCoaches(r) {
+    const f = Object.assign({ side: "all", lvl: "all", q: "" }, ST.cf || {});
+    r.innerHTML = `<div class="ls-top"><button class="ghost back" data-home>‹ Plan</button>${coachOn() ? `<button class="ghost" data-lensoff>Lens off</button>` : ""}</div>
+      <div class="ls-head"><span class="lab">Coach's lens</span><h2>Fifty coaches</h2><p class="why">Pick one to see the plan through his approach. Nothing in the lessons changes except his notes, which show up only where he has something to say.</p></div>
+      <div class="cf"><input type="search" class="teamsel" placeholder="Search coaches, teams, schemes" value="${esc(f.q)}" data-cq>
+        <div class="ctlrow">${segHTML("cs", [["all", "All"], ["offense", "Offense"], ["defense", "Defense"], ["program", "Program"]], f.side)}${segHTML("cl", [["all", "All"], ["nfl", "NFL"], ["college", "College"]], f.lvl)}</div></div>
+      <div class="clist"></div><p class="foot">${esc(KC.NOTE)}</p>`;
+    const list = r.querySelector(".clist");
+    const render = () => {
+      ST.cf = f; save();
+      const q = f.q.trim().toLowerCase();
+      const rows = KC.COACHES.filter(c => (f.side === "all" || c.side === f.side) && (f.lvl === "all" || c.lvl === f.lvl || c.lvl === "both") &&
+        (!q || (c.name + " " + c.teams + " " + c.known + " " + c.philosophy).toLowerCase().includes(q)));
+      list.innerHTML = rows.length ? rows.map(c => `<button class="crow${ST.coach === c.id ? " on" : ""}" data-coach="${c.id}"><span class="ci">${esc(initials(c.name))}</span><span class="cb"><b>${esc(c.name)}</b><span class="cy">${esc(c.years)} · ${SIDE[c.side]} · ${LVL[c.lvl]}</span><span class="ck">${esc(c.known)}</span></span></button>`).join("")
+        : `<p class="note">No coach matches.</p>`;
+    };
+    r.querySelector("[data-cq]").addEventListener("input", e => { f.q = e.target.value; render(); });
+    onSeg(r, "cs", v => { f.side = v; render(); }); onSeg(r, "cl", v => { f.lvl = v; render(); });
+    render();
+  }
+  function renderCoach(r, id) {
+    const c = KC.BYID[id]; if (!c) { renderCoaches(r); return; }
+    const on = ST.coach === c.id;
+    const lessons = LESSONS.filter(l => c.notes[l.id]);
+    r.innerHTML = `<div class="ls-top"><button class="ghost back" data-coaches>‹ Coaches</button><button class="ghost back" data-home>Plan</button></div>
+      <div class="ls-head"><span class="lab">${esc(c.years)} · ${SIDE[c.side]} · ${LVL[c.lvl]}</span><h2>${esc(c.name)}</h2><p class="why">${esc(c.teams)}</p></div>
+      <button class="bigbtn${on ? " offb" : ""}" ${on ? "data-lensoff" : `data-lenson="${c.id}"`}>${on ? "Leave this lens" : "Step into this lens"}</button>
+      <div class="st-key"><span class="lab">Known for</span><p>${esc(c.known)}</p></div>
+      <h4 class="st-h">The approach</h4><p class="st-p">${esc(c.philosophy)}</p>
+      <h4 class="st-h">For the quarterback</h4><p class="st-p">${esc(c.qb)}</p>
+      <h4 class="st-h">Where he speaks up</h4>
+      <div class="ph-l clessons">${lessons.map(l => `<button class="lrow ${lessonState(l)}" data-open="${l.id}" data-withlens="${c.id}"><span class="dot"></span><span class="lt">${esc(l.title)}<span class="cn">${esc(c.notes[l.id])}</span></span><span class="lm">P${l.phase.n}</span></button>`).join("")}</div>
+      <h4 class="st-h">On film</h4><div class="cfilms"></div><div class="cdrill"></div>
+      <p class="foot">${esc(KC.NOTE)}</p>`;
+    const fh = r.querySelector(".cfilms");
+    for (const f of c.films) fh.appendChild(new Board({ films: [f], opts: { rules: true, zones: true, routes: true }, explore: true }).el);
+    r.querySelector(".cdrill").appendChild(drillEl(c.drill));
   }
   function refreshLessonHead() {
     if (cur.view !== "lesson") return;
@@ -940,7 +993,8 @@
     const ph = l.phase, idx = LESSONS.indexOf(l), prev = LESSONS[idx - 1], next = LESSONS[idx + 1];
     r.innerHTML = `
       <div class="ls-top"><button class="ghost back" data-home>‹ Plan</button><span class="ls-status"></span></div>
-      <div class="ls-head"><span class="lab">Phase ${ph.n} · ${esc(ph.title)} ${lensChip(ph.lens)}</span><h2>${esc(l.title)}</h2><p class="why">${esc(l.why)}</p></div>
+      <div class="ls-head"><span class="lab">Phase ${ph.n} · ${esc(ph.title)}</span><h2>${esc(l.title)}</h2><p class="why">${esc(l.why)}</p></div>
+      ${lessonCoach(l)}
       <div class="ls-body"></div>
       <div class="ls-foot">
         ${checksOf(l).length ? "" : `<button class="bigbtn" data-mark>${ST.done[l.id] ? "Marked complete" : "Mark complete"}</button>`}
@@ -993,7 +1047,11 @@
   // navigation clicks anywhere in the tab
   document.addEventListener("click", e => {
     if (!root() || !root().contains(e.target)) return;
-    const o = e.target.closest("[data-open]"); if (o) { show({ view: "lesson", id: o.dataset.open }); return; }
+    const o = e.target.closest("[data-open]"); if (o) { if (o.dataset.withlens) { ST.coach = o.dataset.withlens; save(); } show({ view: "lesson", id: o.dataset.open }); return; }
+    const on = e.target.closest("[data-lenson]"); if (on) { ST.coach = on.dataset.lenson; touchDay(); save(); show({ view: "coach", id: ST.coach }); return; }
+    if (e.target.closest("[data-lensoff]")) { ST.coach = null; save(); show(cur.view === "coach" ? cur : (cur.view === "lesson" ? cur : { view: "home" })); return; }
+    const cc = e.target.closest("[data-coach]"); if (cc) { show({ view: "coach", id: cc.dataset.coach }); return; }
+    if (e.target.closest("[data-coaches]")) { show({ view: "coaches" }); return; }
     if (e.target.closest("[data-home]")) { show({ view: "home" }); return; }
     const rp = e.target.closest("[data-reps]"); if (rp) { show({ view: "reps", mode: rp.dataset.reps }); return; }
     if (e.target.closest("[data-film]")) { show({ view: "film" }); return; }

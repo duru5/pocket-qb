@@ -1,7 +1,7 @@
 /* Pocket QB service worker: app files cache-first (the app runs offline);
    fonts cached as they load. A new build gets a new cache name and the old one is deleted. */
-const CACHE = "pocketqb-4cc9ffb8b6";
-const FILES = ["./", "index.html", "manifest.webmanifest", "calib.js", "engine.js", "playbook.js", "defense.js", "play.js", "run.js", "rep.js", "drive.js", "lab.js", "app.js", "game.js", "study_content.js", "study.js", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-512-maskable.png"];
+const CACHE = "pocketqb-b43943e229";
+const FILES = ["./", "index.html", "manifest.webmanifest", "calib.js", "engine.js", "playbook.js", "defense.js", "play.js", "run.js", "rep.js", "drive.js", "lab.js", "app.js", "game.js", "study_content.js", "coaches.js", "study.js", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-512-maskable.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("pocketqb-") && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));

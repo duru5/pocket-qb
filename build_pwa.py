@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "docs")   # GitHub Pages serves main /docs
-JS = ["calib.js", "engine.js", "playbook.js", "defense.js", "play.js", "run.js", "rep.js", "drive.js", "lab.js", "app.js", "game.js", "study_content.js", "study.js"]
+JS = ["calib.js", "engine.js", "playbook.js", "defense.js", "play.js", "run.js", "rep.js", "drive.js", "lab.js", "app.js", "game.js", "study_content.js", "coaches.js", "study.js"]
 TURF, CHALK, GOLD, LEATHER = (14, 36, 24), (228, 240, 243), (232, 197, 71), (138, 75, 37)
 
 def icon(size, maskable=False):

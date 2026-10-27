@@ -6,25 +6,6 @@
 (function (root) {
   "use strict";
 
-  const LENSES = {
-    process: {
-      name: "The Process", coach: "Nick Saban", tag: "Standards over results",
-      html: `<p>Saban's programs are known for what he called the process: break the job into small steps, set a standard for each step, and grade the step instead of the result of the play. For a quarterback that means the same pre-snap routine on every snap, a named key defender for every concept, and film graded on one question: was the decision right, and was it on time?</p>
-        <p>A completion on a bad read is still a bad read. An incompletion on the right read, on time, is a good rep. This plan grades you that way.</p>`
-    },
-    situation: {
-      name: "Situational football", coach: "Bill Belichick", tag: "Know the situation",
-      html: `<p>Belichick's teams were known for preparing for situations: down and distance, field position, the clock, the score, the opponent's habits and the rules that govern each one. Players were expected to know what to do in a situation before it happened.</p>
-        <p>The quarterback's version: know what a sack, an incompletion and an interception each cost right now, know what defenses call on third and long, and never turn a bad play into a disaster.</p>`
-    },
-    system: {
-      name: "The System", coach: "Kyle Shanahan", tag: "Same look, different answers",
-      html: `<p>Shanahan's offenses are known for building everything from a few looks: the outside zone run, play-action and boots that look like it, and pass concepts that start the same way. Personnel and motion make the defense declare its plan before the snap.</p>
-        <p>The quarterback's job inside that system is timing and distribution: get the ball to the window the play creates, on rhythm, and take what the defense gives. The scheme does the deceiving; the quarterback does not need to be a hero.</p>`
-    }
-  };
-  const LENS_NOTE = "These are short summaries of approaches the three coaches are publicly known for. The plan is built in their spirit. It is not their material and it does not quote them.";
-
   /* ---------- films used in several places ---------- */
   const F = {
     floodQ:   { cid: "flood", cov: "c4" },
@@ -63,7 +44,7 @@
   /* ---------- the plan ---------- */
   const PHASES = [
     /* ================================================================ */
-    { id: "p1", n: 1, title: "The language", lens: "process",
+    { id: "p1", n: 1, title: "The language",
       goal: "Count a formation, name a front and a package, and say what the defense's personnel lets it call.",
       lessons: [
         { id: "l11", title: "Strength, numbers and leverage", mins: 7,
@@ -101,7 +82,6 @@
             { p: `The box is the area between the tackles, about five yards deep. The box count is how many defenders are in it. More bodies there helps the run defense and takes them out of coverage. NFL runs by box count:` },
             { widget: "boxRuns" },
             { note: `This is a correlation, not a controlled experiment: defenses load the box when they expect a run, often in short yardage, which pulls the numbers down for heavy boxes. The direction is still the lesson.` },
-            { lens: "system", html: `Shanahan-style offenses use personnel as a weapon. Come out heavy (12 or 21) to get base defense and a loaded box, then throw against linebackers. Or spread the same players out of a heavy grouping to get a linebacker on a receiver.` },
             { mc: { q: "You come out in 12 personnel on first and 10 and the defense stays in nickel. Where is the advantage?", opts: ["Four verticals", "The run and play-action, against a light box", "Screens to the slot", "Nowhere; nickel is the right answer"], a: 1,
               why: "Nickel takes a linebacker off the field. Two tight ends and a back against a light box favors the run, and the run sets up play-action." } },
             { mc: { q: "Third and 9. You are in 11 personnel and the defense brings on a sixth defensive back. What should you expect?", opts: ["Cover 0", "A heavy run front", "Two-high shells, or pressure from a defensive back", "A goal-line front"], a: 2,
@@ -128,7 +108,7 @@
       ] },
 
     /* ================================================================ */
-    { id: "p2", n: 2, title: "Coverage identification", lens: "process",
+    { id: "p2", n: 2, title: "Coverage identification",
       goal: "Name the coverage family from the safeties and the exact coverage from the corners and the snap.",
       lessons: [
         { id: "l21", title: "Man, zone and match", mins: 8,
@@ -294,7 +274,7 @@
       ] },
 
     /* ================================================================ */
-    { id: "p3", n: 3, title: "Match rules", lens: "process",
+    { id: "p3", n: 3, title: "Match rules",
       goal: "Know each zone defender's rule well enough to predict where he goes before he goes there.",
       lessons: [
         { id: "l31", title: "Cover 3 match: the seam carry", mins: 9,
@@ -368,7 +348,7 @@
       ] },
 
     /* ================================================================ */
-    { id: "p4", n: 4, title: "Pressure and protection", lens: "situation",
+    { id: "p4", n: 4, title: "Pressure and protection",
       goal: "Count the rush, set the protection, and know where the hot throw is before the snap.",
       lessons: [
         { id: "l41", title: "Count the rush", mins: 7,
@@ -418,7 +398,7 @@
       ] },
 
     /* ================================================================ */
-    { id: "p5", n: 5, title: "Concepts and the conflict defender", lens: "system",
+    { id: "p5", n: 5, title: "Concepts and the conflict defender",
       goal: "For every concept, name the defender in conflict and throw the receiver he does not take.",
       lessons: [
         { id: "l51", title: "One defender, two receivers", mins: 8,
@@ -436,7 +416,7 @@
                 { t: 1.0, title: "The conflict", text: "The flat corner is under the corner route and over the hitch.", hl: { zone: ["Flat L", "Flat R"] } },
                 { t: 1.6, title: "The window", text: "At the top of the drop the corner route peaks. Late, the half safety closes it." }
               ] } },
-            { lens: "system", html: `This is why the system can stay simple for the quarterback. The play design creates the conflict; his job is to identify one defender and be on time. The reads in this phase are one-defender reads.` }
+            { key: `The play design creates the conflict; the quarterback's job is to identify one defender and be on time. Every read in this phase is a one-defender read.` }
           ] },
         { id: "l52", title: "Hi-lo the flat: Smash and Curl-Flat", mins: 8,
           why: "The two oldest answers to a flat defender.",
@@ -502,7 +482,7 @@
       ] },
 
     /* ================================================================ */
-    { id: "p6", n: 6, title: "Timing and the read routine", lens: "process",
+    { id: "p6", n: 6, title: "Timing and the read routine",
       goal: "Throw on rhythm from the top of the drop, use your eyes, and run the same routine every snap.",
       lessons: [
         { id: "l61", title: "The drop is the clock", mins: 8,
@@ -517,7 +497,7 @@
                 { t: 2.8, title: "On time", text: "Top of the drop with the hitch: the dig is breaking behind the hook." },
                 { t: 3.0, title: "Late", text: "Every tenth after this the defenders rally." }
               ] } },
-            { lens: "process", html: `Grade the decision time, not the completion. Play's result screen shows the best throw available when you released and the best window of the whole rep; the gap between them is your read gap.` }
+            { key: `Grade the decision time, not the completion. Play's result screen shows the best throw available when you released and the best window of the whole rep; the gap between them is your read gap.` }
           ] },
         { id: "l62", title: "Eyes move defenders", mins: 6,
           why: "Instinctive zone defenders read the quarterback's eyes.",
@@ -532,7 +512,7 @@
         { id: "l63", title: "The routine, huddle to throw", mins: 10,
           why: "The same checklist every snap, until it is automatic.",
           blocks: [
-            { lens: "process", html: `This is the process lens at its plainest: one routine, every snap, each step narrowing the next. Grade yourself on whether you ran it, not on whether the ball was caught.` },
+            { key: `One routine, every snap, each step narrowing the next. Grade yourself on whether you ran it, not on whether the ball was caught.` },
             { widget: "routine" },
             { reveal: { q: "Why look at the middle safety first after the snap?", a: "He is the fastest single answer to the family: in the middle, one-high; split to a half, two-high. That answer overrides the pre-snap look and tells you which side of your call and kill to work." } },
             { reveal: { q: "What does a free rusher change about the read?", a: "Nothing about which receiver is right. It changes when: the ball comes out to the first open route on the blitz side, before the rusher arrives." } },
@@ -541,7 +521,7 @@
       ] },
 
     /* ================================================================ */
-    { id: "p7", n: 7, title: "Situational football", lens: "situation",
+    { id: "p7", n: 7, title: "Situational football",
       goal: "Know what the defense calls in each situation, what each outcome costs, and when to take the safe play.",
       lessons: [
         { id: "l71", title: "Down and distance", mins: 9,
@@ -565,7 +545,7 @@
         { id: "l72", title: "What a mistake costs", mins: 9,
           why: "Never turn a bad play into a disaster.",
           blocks: [
-            { lens: "situation", html: `Ball security is the first rule. An incompletion costs a down. A sack costs a down and yards. An interception costs the possession and usually the field. Know the price of each before the snap, and when the play is dead, take the cheapest outcome.` },
+            { key: `Ball security is the first rule. An incompletion costs a down. A sack costs a down and yards. An interception costs the possession and usually the field. Know the price of each before the snap, and when the play is dead, take the cheapest outcome.` },
             { widget: "cost" },
             { p: `Expected points (EP) are the points a possession is worth on average from a down, distance and spot, from the nflverse model. EPA is the change a play makes. Field position changes the price: the same interception is worse at midfield than deep in your own end only because of where the other team gets the ball.` },
             { widget: "epCurve" },
@@ -593,7 +573,7 @@
       ] },
 
     /* ================================================================ */
-    { id: "p8", n: 8, title: "Game planning", lens: "system",
+    { id: "p8", n: 8, title: "Game planning",
       goal: "Build call-and-kill pairs that cover both shells, use play-action and similar looks, and scout yourself.",
       lessons: [
         { id: "l81", title: "Call and kill: one play for each shell", mins: 9,
@@ -607,7 +587,7 @@
         { id: "l82", title: "Same look, different plays", mins: 9,
           why: "The illusion of complexity: few looks, many answers.",
           blocks: [
-            { lens: "system", html: `If every play starts the same way, the defense cannot play the first two steps. Shanahan-style offenses run their run game, their play-action and their dropback concepts from the same personnel and the same formations, so the defense has to wait, and waiting is a step late.` },
+            { p: `If every play starts the same way, the defense cannot play the first two steps. Run the run game, the play-action and the dropback concepts from the same personnel and the same formations, and the defense has to wait. Waiting is a step late.` },
             { p: `Five plays from the same doubles formation against the same Cover 3. Flip between them at 0.5 seconds: the releases look alike. By the top of the drop they are five different problems.` },
             { board: { films: [{ label: "Smash", spec: { cid: "smash", cov: "c3sky" } }, { label: "Dagger", spec: F.daggerC3 }, { label: "Y-Cross", spec: F.ycrossC3 }, { label: "Four Verts", spec: { cid: "verts", cov: "c3sky" } }, { label: "Drive", spec: { cid: "drive", cov: "c3sky" } }], opts: { rules: false, zones: false, routes: false }, start: 0.5 } },
             { h: "Play-action" },
@@ -623,14 +603,14 @@
         { id: "l83", title: "Self-scout", mins: 6,
           why: "The defense is scouting you. Scout yourself first.",
           blocks: [
-            { lens: "situation", html: `Opponents build their plan from your tendencies. Know them before they do: where your mistakes come from, which coverages you misread, how often you take sacks.` },
+            { p: `Opponents build their plan from your tendencies. Know them before they do: where your mistakes come from, which coverages you misread, how often you take sacks.` },
             { widget: "selfScout" },
             { p: `Play's coordinator adapts within a game: run often and he loads the box and respects play-action more; beat a coverage and he calls it less. Your tendencies are a weapon only if you know them.` }
           ] },
         { id: "l84", title: "The practice week", mins: 5,
           why: "A weekly plan that uses every part of the app.",
           blocks: [
-            { p: `A week in the spirit of the three lenses: install and fundamentals early, situations in the middle, the whole game at the end. Each day is 20 to 30 minutes. The buttons open the right drill.` },
+            { p: `A week built the way most staffs build one: install and fundamentals early, situations in the middle, the whole game at the end. Each day is 20 to 30 minutes. The buttons open the right drill.` },
             { widget: "week" }
           ] }
       ] }
@@ -656,15 +636,15 @@
 
   /* the week (Phase 8) */
   const WEEK = [
-    { day: "Mon", focus: "Film and install", lens: "process", items: [["lesson", "Review a Phase 2 or 3 lesson"], ["film", "Film room: this week's concepts against every coverage"]] },
-    { day: "Tue", focus: "First and second down", lens: "system", items: [["drill", "12 personnel, early downs"], ["reps", "Throw reps: 10"]] },
-    { day: "Wed", focus: "Third down", lens: "situation", items: [["drill", "Third and long"], ["drill", "Third and short"]] },
-    { day: "Thu", focus: "Red zone and pressure", lens: "situation", items: [["drill", "Red zone"], ["drill", "Pressure looks"]] },
-    { day: "Fri", focus: "Two-minute", lens: "situation", items: [["drill", "Two-minute"], ["reps", "Coverage reps: 10"]] },
-    { day: "Sat", focus: "Game", lens: "system", items: [["play", "A full game mode at your level"], ["lesson", "Self-scout"]] }
+    { day: "Mon", focus: "Film and install", items: [["lesson", "Review a Phase 2 or 3 lesson"], ["film", "Film room: this week's concepts against every coverage"]] },
+    { day: "Tue", focus: "First and second down", items: [["drill", "12 personnel, early downs"], ["reps", "Throw reps: 10"]] },
+    { day: "Wed", focus: "Third down", items: [["drill", "Third and long"], ["drill", "Third and short"]] },
+    { day: "Thu", focus: "Red zone and pressure", items: [["drill", "Red zone"], ["drill", "Pressure looks"]] },
+    { day: "Fri", focus: "Two-minute", items: [["drill", "Two-minute"], ["reps", "Coverage reps: 10"]] },
+    { day: "Sat", focus: "Game", items: [["play", "A full game mode at your level"], ["lesson", "Self-scout"]] }
   ];
 
-  const api = { LENSES, LENS_NOTE, PHASES, ROUTINE, WEEK, FILMS: F };
+  const api = { PHASES, ROUTINE, WEEK, FILMS: F };
   root.PocketStudyContent = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);
