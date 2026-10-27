@@ -1,0 +1,29 @@
+{
+ "name": "Pocket QB",
+ "short_name": "Pocket QB",
+ "description": "Call it, read it, throw it. A quarterback read trainer calibrated to NFL data.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#0E2418",
+ "theme_color": "#0E2418",
+ "icons": [
+  {
+   "src": "icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icons/icon-512-maskable.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

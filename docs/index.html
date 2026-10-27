@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E2418">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pocket QB">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Pocket QB</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: phone-first single column; the field is a full-bleed instrument band,
+   reading material stacks under it. Desktop splits field | detail.
+   Tokens are shared with the Coverage Clock so the family reads as one tool. */
+:root{
+  --ground:#E9ECEE; --panel:#FFFFFF; --panel-2:#F2F5F6;
+  --line:#D2D9DC; --line-2:#E3E9EB;
+  --ink:#0F1518; --ink-2:#4A565C; --ink-3:#7B888E;
+  --accent:#0C8296; --accent-2:#0A6B7C; --accent-wash:#DCEFF3;
+  --good:#1F8A4C; --good-wash:#DFF2E6;
+  --alert:#B84A24; --alert-wash:#F8E7E0;
+  --shadow:0 1px 2px rgba(15,21,24,.06), 0 8px 24px -12px rgba(15,21,24,.18);
+  --f-display:"Saira Condensed","Arial Narrow",sans-serif;
+  --f-body:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  /* the field is an instrument surface: identical in both themes */
+  --turf:#0C1417; --chalk:#E4F0F3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A0F12; --panel:#121A1E; --panel-2:#182227;
+    --line:#26343A; --line-2:#1E2A2F;
+    --ink:#E5EEF1; --ink-2:#9DAFB6; --ink-3:#6A7B83;
+    --accent:#37C6DB; --accent-2:#5BD8EA; --accent-wash:#0E2C33;
+    --good:#4CCB83; --good-wash:#0F2A1C;
+    --alert:#FF8455; --alert-wash:#331A10;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A0F12; --panel:#121A1E; --panel-2:#182227;
+  --line:#26343A; --line-2:#1E2A2F;
+  --ink:#E5EEF1; --ink-2:#9DAFB6; --ink-3:#6A7B83;
+  --accent:#37C6DB; --accent-2:#5BD8EA; --accent-wash:#0E2C33;
+  --good:#4CCB83; --good-wash:#0F2A1C;
+  --alert:#FF8455; --alert-wash:#331A10;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+p{margin:0}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.app{max-width:1180px;margin:0 auto;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:14px 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--ground)}
+
+/* masthead */
+.mast{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-bottom:10px}
+.eyebrow{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,7vw,44px);line-height:.95;letter-spacing:-.005em}
+.mast .sub{font-size:13px;color:var(--ink-3);margin-top:4px}
+
+/* tabs */
+.tabs{display:flex;gap:4px;
+  background:var(--ground);padding:6px 0 10px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tab{flex:1;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:9px 6px;
+  font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab .badge{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:0;
+  background:rgba(255,255,255,.22);border-radius:999px;padding:0 6px}
+.tab[aria-selected="false"] .badge{background:var(--accent-wash);color:var(--accent-2)}
+
+/* concept chips */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:thin}
+.chip{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);border-radius:7px;
+  padding:6px 11px;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.04em;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+.chip.toggle[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* layout */
+.book{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:960px){.book{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:start}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);min-width:0}
+.pbody{padding:14px 16px}
+.phead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.phead h3,.h3{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase}
+.phead .hint{font-size:12px;color:var(--ink-3)}
+
+/* field */
+.fieldwrap{position:relative;background:var(--turf);border-radius:10px 10px 0 0;overflow:hidden}
+.fieldwrap canvas{display:block;width:100%;touch-action:manipulation}
+.f-clock{position:absolute;right:10px;top:6px;font-family:var(--f-display);font-weight:700;font-size:26px;
+  color:var(--chalk);font-variant-numeric:tabular-nums;text-align:right;pointer-events:none;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.f-clock small{display:block;font-size:10px;font-weight:600;letter-spacing:.15em;color:rgba(228,240,243,.5);margin-top:-4px}
+.f-tag{position:absolute;left:10px;bottom:8px;font-family:var(--f-display);font-weight:700;font-size:12px;
+  letter-spacing:.14em;text-transform:uppercase;color:rgba(228,240,243,.75);pointer-events:none}
+.f-drop{position:absolute;left:10px;bottom:28px;font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.12em;
+  text-transform:uppercase;background:#37C6DB;color:#0C1417;border-radius:4px;padding:1px 7px;pointer-events:none;
+  opacity:0;transition:opacity .15s}
+.f-drop.on{opacity:1}
+@media (max-width:599px){
+  .bleed{margin-left:calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+         margin-right:calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+         border-radius:0;border-left:none;border-right:none}
+  .bleed .fieldwrap{border-radius:0}
+}
+
+.transport{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line-2);flex-wrap:wrap}
+.playbtn{width:44px;height:44px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
+.playbtn svg{width:16px;height:16px;fill:currentColor}
+.scrub{flex:1 1 180px;min-width:0;display:flex;flex-direction:column}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0}
+.ticks{position:relative;height:14px;font-family:var(--f-mono);font-size:10px;color:var(--ink-3)}
+.ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.ticks span.drop{color:var(--accent);font-weight:700}
+.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;flex:none}
+.seg button{border:none;background:var(--panel);color:var(--ink-2);padding:8px 10px;font-size:12.5px;cursor:pointer;font-variant-numeric:tabular-nums}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.opts{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 12px}
+
+/* concept detail */
+.cname{font-family:var(--f-display);font-weight:700;font-size:32px;line-height:1}
+.cmeta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:13px;color:var(--ink-3)}
+.cmeta b{color:var(--ink-2);font-weight:600}
+.block{padding:14px 16px;border-top:1px solid var(--line-2);display:flex;flex-direction:column;gap:8px}
+.lab{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.rule{font-size:15px;line-height:1.55;max-width:62ch}
+.keyd{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:.03em;color:var(--accent-2)}
+.prog{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.prog li{display:flex;align-items:center;gap:10px;font-size:14px}
+.num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);
+  font-weight:700;font-size:12px;color:#0C1417;flex:none}
+.prog .rt{color:var(--ink-2)}
+.prog .pos{font-family:var(--f-display);font-weight:700;letter-spacing:.06em;font-size:15px;min-width:24px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.04em;border-radius:5px;padding:2px 8px;border:1px solid}
+.tag.beat{background:var(--good-wash);color:var(--good);border-color:transparent}
+.tag.weak{background:var(--alert-wash);color:var(--alert);border-color:transparent}
+.note{font-size:13.5px;color:var(--ink-2);max-width:62ch}
+
+/* timing table */
+.tblwrap{overflow-x:auto}
+table.timing{width:100%;border-collapse:collapse;font-size:13px;min-width:330px}
+.timing th{text-align:left;font-family:var(--f-display);font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding:8px 16px 6px 0;border-bottom:1px solid var(--line-2)}
+.timing th:first-child,.timing td:first-child{padding-left:16px}
+.timing td{padding:7px 16px 7px 0;border-bottom:1px solid var(--line-2);font-variant-numeric:tabular-nums}
+.timing td.m{font-family:var(--f-mono);font-size:12.5px;text-align:right}
+.timing th.r{text-align:right}
+.timing tr:last-child td{border-bottom:none}
+.timing .pos{font-family:var(--f-display);font-weight:700;letter-spacing:.05em;font-size:14.5px}
+.timing tr.dropRow td{color:var(--accent-2);font-weight:600;background:var(--accent-wash)}
+.rhythm{font-family:var(--f-display);font-weight:700;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--accent);border:1px solid currentColor;border-radius:3px;padding:0 4px;margin-left:6px;vertical-align:1px}
+.foot{font-size:12px;color:var(--ink-3);padding:10px 16px 14px}
+
+/* install */
+.install{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;max-width:760px;margin:0 auto}
+.stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--panel-2);border-radius:8px;padding:10px 12px}
+.stat .v{font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.stat .k{font-size:12px;color:var(--ink-3);margin-top:3px}
+.bigbtn{width:100%;border:none;border-radius:9px;background:var(--accent);color:#fff;padding:14px;
+  font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.bigbtn:disabled{opacity:.45;cursor:default}
+.ghost{border:1px solid var(--line);background:transparent;border-radius:8px;padding:10px 14px;font-size:14px;cursor:pointer;color:var(--ink-2)}
+.ghost.danger{color:var(--alert)}
+.ghost.armed{background:var(--alert);border-color:var(--alert);color:#fff}
+.qtop{display:flex;align-items:center;gap:10px;padding:12px 16px}
+.bar{flex:1;height:6px;background:var(--panel-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s}
+.qcount{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.qtype{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.prompt{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.1;margin-top:3px}
+.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:14px 16px}
+.ans{border:1.5px solid var(--line);background:var(--panel);border-radius:9px;padding:13px 10px;min-height:52px;
+  font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:.03em;cursor:pointer;text-align:center;color:var(--ink)}
+.ans:hover:not(:disabled){border-color:var(--accent)}
+.ans:disabled{cursor:default}
+.ans.right{background:var(--good-wash);border-color:var(--good);color:var(--good)}
+.ans.wrong{background:var(--alert-wash);border-color:var(--alert);color:var(--alert)}
+.ans.dim{opacity:.45}
+.orderbar{display:flex;align-items:center;gap:8px;padding:12px 16px;flex-wrap:wrap}
+.orderbar .seq{flex:1;display:flex;gap:6px;min-height:28px;align-items:center;font-size:13px;color:var(--ink-3)}
+.fb{margin:0 16px 14px;border-radius:9px;padding:12px 14px;font-size:14.5px;line-height:1.5}
+.fb.ok{background:var(--good-wash)}
+.fb.no{background:var(--alert-wash)}
+.fb .verdict{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.fb.ok .verdict{color:var(--good)}
+.fb.no .verdict{color:var(--alert)}
+.nextrow{padding:0 16px 16px}
+.intro .rule{margin-top:4px}
+
+/* progress */
+.mrow{display:grid;grid-template-columns:minmax(88px,120px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--line-2)}
+.mrow:last-child{border-bottom:none}
+.mrow .nm{font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.03em}
+.boxes{display:flex;gap:3px}
+.boxes i{flex:1;height:10px;border-radius:2px;background:var(--panel-2)}
+.boxes i.b1{background:var(--alert)}
+.boxes i.b2,.boxes i.b3{background:var(--accent);opacity:.55}
+.boxes i.b4,.boxes i.b5,.boxes i.b6{background:var(--accent)}
+.mrow .pct{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 16px 14px;font-size:12px;color:var(--ink-3)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:12px;height:10px;border-radius:2px;display:block}
+/* play */
+.about{font-size:13.5px;color:var(--ink-2);margin:-4px 0 12px;max-width:62ch}
+.col{display:flex;flex-direction:column;gap:14px}
+.col.tight{gap:6px}
+.stats4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:420px){.stats4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lock{font-size:13px;color:var(--alert);background:var(--alert-wash);border-radius:7px;padding:8px 10px}
+.how{border-top:1px solid var(--line-2);padding-top:10px}
+.how summary{cursor:pointer;font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.how ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ink-2);max-width:62ch}
+.how b{color:var(--ink)}
+.ptop{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;padding:12px 16px}
+.ptop .lvl{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);text-align:right}
+.ptop-r{display:flex;align-items:center;gap:10px}
+.exitbtn{width:36px;height:36px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--panel-2);
+  display:grid;place-items:center;cursor:pointer}
+.exitbtn svg{width:14px;height:14px;stroke:var(--ink-2);stroke-width:2;fill:none;stroke-linecap:round}
+.fieldwrap canvas{margin:0 auto}
+
+/* full-screen play mode: the snap owns the whole screen */
+body.immersive{overflow:hidden;overscroll-behavior:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body.immersive .mast,body.immersive .tabs{display:none}
+body.immersive #playRep{position:fixed;inset:0;z-index:20;margin:0;border:none;border-radius:0;box-shadow:none;
+  display:flex;flex-direction:column;background:var(--panel);
+  padding-top:env(safe-area-inset-top, 0px);padding-bottom:env(safe-area-inset-bottom, 0px);
+  padding-left:env(safe-area-inset-left, 0px);padding-right:env(safe-area-inset-right, 0px)}
+body.immersive #playRep[hidden]{display:none}
+body.immersive #playRep .ptop{padding:8px 14px}
+body.immersive #playRep .prompt{font-size:20px}
+body.immersive #playRep .fieldwrap{flex:none;border-radius:0;background:var(--turf)}
+body.immersive #playRep .ctl{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+canvas.play{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.f-clock .warn{color:#FF8455}
+.f-msg{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-family:var(--f-display);font-weight:700;
+  font-size:30px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk);text-shadow:0 2px 14px rgba(0,0,0,.8);
+  opacity:0;transition:opacity .12s;pointer-events:none}
+.f-msg.on{opacity:1}
+.f-msg.good{color:#4CCB83}
+.f-msg.bad{color:#FF8455}
+.ctl{padding:12px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.chips.wrap{flex-wrap:wrap;overflow:visible;margin:0;padding:0}
+.pers{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pers b{font-family:var(--f-display);font-weight:700;font-size:22px}
+.pers .cnt{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.scout{display:flex;flex-direction:column;gap:4px}
+.sc{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;font-size:13px;color:var(--ink-2);border-left:3px solid #E8C547;padding-left:8px}
+.sc b{color:var(--ink)}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slot,.killbtn{border:1.5px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 11px;text-align:left;cursor:pointer;
+  display:flex;flex-direction:column;gap:1px;min-width:0}
+.slot b,.killbtn b{font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-wash)}
+.killbtn small{font-size:12px;color:var(--ink-3)}
+.killbtn:disabled{cursor:default}
+.seg.wide{width:100%}
+.seg.wide button{flex:1;padding:10px}
+.snapbtn{font-size:22px;padding:16px}
+.hint{font-size:12.5px;color:var(--ink-3)}
+.hint.strong{font-size:14px;color:var(--ink-2);text-align:center}
+.ghost.wide{width:100%}
+.reshead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;border-radius:9px;padding:10px 12px}
+.reshead b{font-family:var(--f-display);font-weight:700;font-size:20px}
+.reshead .epa{font-family:var(--f-mono);font-weight:700;font-size:15px}
+.reshead.good{background:var(--good-wash);color:var(--good)}
+.reshead.bad{background:var(--alert-wash);color:var(--alert)}
+.resrows{display:flex;flex-direction:column}
+.rr{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px solid var(--line-2);font-size:13.5px;line-height:1.45}
+.rr:last-child{border-bottom:none}
+.rr .k{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding-top:1px}
+.rr.good .k{color:var(--good)}
+.rr.bad .k{color:var(--alert)}
+.resbtns{display:flex;gap:8px;flex-wrap:wrap}
+.readhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.readgrid{display:flex;flex-direction:column;gap:6px}
+.rg{display:grid;grid-template-columns:72px minmax(0,1fr);gap:8px;align-items:center}
+.rgl{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.rg .chip{font-size:14px;padding:5px 9px}
+.protrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.scrubrow{display:flex;flex-direction:column;gap:2px}
+.tabs .tab{letter-spacing:.06em;font-size:14px}
+.credit{font-size:11.5px;color:var(--ink-3);text-align:center;padding:18px 16px 28px;margin:0}
+/* installed to the Home Screen: keep the masthead clear of the status bar */
+@media (display-mode: standalone){ body:not(.immersive) .app{padding-top:env(safe-area-inset-top, 0px)} }
+/* build 2: modes, personnel, the scoreboard, between plays */
+.seg.wrapseg{flex-wrap:wrap}
+.teamsel{width:100%;font:inherit;font-size:15px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+#playRep .fieldwrap{background:#10291B}
+.opp{margin-left:auto;font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.04em;padding:2px 8px;border-radius:5px;border-left:5px solid var(--tc);background:var(--panel-2)}
+.scoutrep{display:flex;flex-direction:column;gap:4px}
+.scoutrep .hint{margin-left:0}
+.tbars{display:flex;flex-direction:column;gap:3px}
+.tb{display:grid;grid-template-columns:96px minmax(0,1fr) 38px;align-items:center;gap:8px;font-size:13px}
+.tb span{font-family:var(--f-display);font-weight:600;font-size:14px}
+.tb i{display:block;height:8px;border-radius:4px;background:var(--accent);opacity:.75}
+.tb b{font-family:var(--f-mono);font-size:12px;text-align:right;font-weight:600}
+.rr.nfl .k{color:#C9A227}
+.rec{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);margin-left:6px}
+.persrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.persrow .seg button{min-width:44px;font-family:var(--f-display);font-weight:700;font-size:16px}
+.persrow .cnt{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.chip.runchip{border-color:#4CCB83}
+.chip.runchip[aria-pressed="true"]{background:rgba(76,203,131,.16);color:#2E9C61;border-color:#4CCB83}
+.chip.pachip{border-color:#E8C547}
+.board{display:flex;align-items:center;gap:12px;padding:6px 14px;background:#0C1417;color:#E4F0F3;font-family:var(--f-display);font-size:15px;letter-spacing:.04em}
+.board .bs{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.board .bs b{font-weight:600;font-size:12px;letter-spacing:.12em;color:#9FB3B9}
+.board .bq{margin-left:auto;font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.board .bq .run{font-style:normal;color:#4CCB83;font-size:10px;margin-left:3px}
+.board .bto{display:flex;gap:3px}
+.board .bto i{width:7px;height:7px;border-radius:50%;border:1px solid #9FB3B9}
+.board .bto i.on{background:#E8C547;border-color:#E8C547}
+.evs{display:flex;flex-wrap:wrap;gap:6px}
+.evs span{font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;background:var(--panel-2);border-radius:6px;padding:4px 8px}
+.nextup{display:flex;align-items:baseline;gap:10px}
+.nextup b{font-family:var(--f-display);font-weight:700;font-size:20px}
+.glog{display:flex;flex-direction:column;font-size:13px}
+.glog div{display:grid;grid-template-columns:80px minmax(0,1fr);gap:8px;padding:4px 0;border-bottom:1px solid var(--line-2)}
+.glog div span{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.glog .good{color:var(--good)} .glog .bad{color:var(--alert)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <header class="mast">
+    <div>
+      <div class="eyebrow">Build 3.2 · match coverage</div>
+      <h1>Pocket QB</h1>
+      <p class="sub">Call it, read it, throw it. Built on the Coverage Clock's motion model and calibrated to NFL data, 2023-2025.</p>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-play" aria-selected="true" data-view="play">Play</button>
+    <button class="tab" role="tab" id="tab-book" aria-selected="false" data-view="book">Playbook</button>
+    <button class="tab" role="tab" id="tab-install" aria-selected="false" data-view="install">Install <span class="badge" id="dueBadge">0</span></button>
+    <button class="tab" role="tab" id="tab-progress" aria-selected="false" data-view="progress">Progress</button>
+  </nav>
+
+  <!-- ================= PLAY ================= -->
+  <section id="v-play">
+    <div class="install">
+      <div class="panel" id="playSetup">
+        <div class="phead"><h3>Play</h3><span class="hint">One snap at a time, scored in EPA</span></div>
+        <div class="pbody col">
+          <div class="stats4">
+            <div class="stat"><div class="v" id="stReps">0</div><div class="k">snaps</div></div>
+            <div class="stat"><div class="v" id="stEpa">—</div><div class="k">EPA / play</div></div>
+            <div class="stat"><div class="v" id="stComp">—</div><div class="k">completion</div></div>
+            <div class="stat"><div class="v" id="stId">—</div><div class="k">coverage reads</div></div>
+          </div>
+          <div class="col tight">
+            <div class="lab">Mode</div>
+            <div class="seg wrapseg" id="modeSeg" role="group" aria-label="Mode"></div>
+            <p class="note" id="modeDesc"></p>
+          </div>
+          <div class="col tight">
+            <div class="lab">Opponent defense</div>
+            <select id="teamSel" class="teamsel" aria-label="Opponent defense"></select>
+            <p class="note" id="teamDesc"></p>
+          </div>
+          <div class="col tight">
+            <div class="lab">Level</div>
+            <div class="seg" id="lvlSeg" role="group" aria-label="Level"></div>
+            <p class="note" id="lvlDesc"></p>
+            <p class="lock" id="lockNote" hidden></p>
+          </div>
+          <button class="bigbtn" id="startRep">Start a snap</button>
+          <details class="how" open>
+            <summary>How it plays</summary>
+            <ol>
+              <li><b>Huddle.</b> The 40-second clock is running. You only see the defense's personnel. Pick a call and a kill (the play you can switch to at the line).</li>
+              <li><b>Line.</b> The defense walks up, shows its tells and may rotate late. Tap the coverage you see: a right read gets the ball out 70 ms sooner, the wrong shell costs 80 ms of hesitation. Watch for blitzers walking down and slide the line toward them, or keep the back in. Tap the call card to kill, then snap. Snapping early beats a late rotation; waiting shows you more.</li>
+              <li><b>Live.</b> Hold anywhere to move your eyes (defenders with instincts follow them). Tap a receiver for a fast ball, double-tap for touch. The ring around the QB is the pocket closing; a red rusher is unblocked, so get it out hot. After the catch the receiver runs: a ball to a man in space is worth more than the air yards say.</li>
+              <li><b>Result.</b> No dice on the throw: it is caught unless a defender can get to it. Inside 1 yard at the catch point he breaks it up (or picks it if he was there first, in front); inside 2 yards it is a contested catch with no yards after; a bullet through a defender's lane gets tipped. The result names the defender and the distance, shows the best throw available when you released and the best window of the rep, and what the defense played.</li>
+              <li><b>Personnel and runs.</b> Pick 11, 12, 21 or 10 personnel in the huddle; the defense subs to match. Heavy sets bring base defense and a crowded box, spread sets bring nickel and dime. Runs (green) are judged by the box count; play-action (gold) pulls linebackers a step or two downhill before they drop, which opens the intermediate windows behind them.</li>
+              <li><b>Game modes.</b> Drive, two-minute drill, a fourth quarter or a second half. The game clock runs between snaps unless the last play stopped it; use timeouts and the spike late. On fourth down choose to go, punt or kick. The defensive coordinator adapts: run a lot and he loads the box, beat a coverage and he calls it less.</li>
+            </ol>
+          </details>
+        </div>
+      </div>
+
+      <div class="panel bleed" id="playRep" hidden>
+        <div class="ptop">
+          <div><div class="qtype" id="pPhase">Huddle</div><div class="prompt" id="pSit"></div></div>
+          <div class="ptop-r">
+            <div class="lvl" id="pLevel"></div>
+            <button class="exitbtn" id="exitRep" aria-label="End session">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="board" id="pBoard" hidden></div>
+        <div class="fieldwrap">
+          <canvas id="playField" class="play" aria-label="Field"></canvas>
+          <div class="f-clock"><span id="pClock">40</span><small id="pClockLab">play clock</small></div>
+          <div class="f-msg" id="pMsg"></div>
+        </div>
+        <div class="ctl" id="playCtl"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PLAYBOOK ================= -->
+  <section id="v-book" hidden>
+    <p class="about">Every concept animated on the engine's clock. Scrub to see where each route is at the top of the drop.</p>
+    <div class="chips" id="conceptChips" role="group" aria-label="Concepts"></div>
+    <div class="book">
+      <div class="panel bleed">
+        <div class="fieldwrap">
+          <canvas id="bookField" aria-label="Concept diagram"></canvas>
+          <div class="f-tag" id="bookTag">Doubles (2x2)</div>
+          <div class="f-drop" id="bookDrop">Top of drop</div>
+          <div class="f-clock"><span id="bookClock">0.00</span><small>sec post-snap</small></div>
+        </div>
+        <div class="transport">
+          <button class="playbtn" id="bookPlay" aria-label="Play"><svg viewBox="0 0 16 16" id="bookPlayIcon"><path d="M3 1.5v13l11-6.5z"/></svg></button>
+          <div class="scrub">
+            <input type="range" id="bookTime" min="-0.3" max="4" step="0.01" value="0" aria-label="Time after the snap">
+            <div class="ticks" id="bookTicks"></div>
+          </div>
+          <div class="seg" role="group" aria-label="Playback speed">
+            <button data-rate="0.25">¼×</button><button data-rate="0.5" aria-pressed="true">½×</button><button data-rate="1">1×</button>
+          </div>
+        </div>
+        <div class="opts">
+          <button class="chip toggle" id="optLabels" aria-pressed="true">Route labels</button>
+          <button class="chip toggle" id="optBreaks" aria-pressed="true">Break times</button>
+          <button class="chip toggle" id="optMirror" aria-pressed="false">Flip formation</button>
+        </div>
+        <div class="tblwrap">
+          <table class="timing" id="timingTbl">
+            <thead><tr><th>Pos</th><th>Route</th><th class="r">Break</th><th class="r">Depth</th><th class="r">Speed out</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="foot">Break is when the receiver reaches the stem's break point. Speed out is yd/s carried into the next leg (0 means a settle). Rhythm marks a break within 0.3 s of the top of the drop.</p>
+      </div>
+
+      <div class="panel" id="conceptCard">
+        <div class="pbody">
+          <div class="cname" id="cName">Smash</div>
+          <div class="cmeta" id="cMeta"></div>
+        </div>
+        <div class="block">
+          <div class="lab">Key defender</div>
+          <div class="keyd" id="cKey"></div>
+          <p class="rule" id="cRule"></p>
+        </div>
+        <div class="block">
+          <div class="lab">Progression</div>
+          <ol class="prog" id="cProg"></ol>
+        </div>
+        <div class="block">
+          <div class="lab">Built to beat</div>
+          <div class="tags" id="cBeats"></div>
+          <div class="lab" style="margin-top:4px">Struggles against</div>
+          <div class="tags" id="cWeak"></div>
+          <p class="note" id="cNote"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INSTALL ================= -->
+  <section id="v-install" hidden>
+    <div class="install">
+      <p class="about">Spaced-repetition drills on the playbook. Concepts you master here unlock for Levels 4 and 5 in Play.</p>
+      <!-- setup -->
+      <div class="panel" id="instSetup">
+        <div class="phead"><h3>Install session</h3><span class="hint">Spaced repetition</span></div>
+        <div class="pbody" style="display:flex;flex-direction:column;gap:14px">
+          <div class="stats3">
+            <div class="stat"><div class="v" id="sDue">0</div><div class="k">due now</div></div>
+            <div class="stat"><div class="v" id="sNew">0</div><div class="k">new cards</div></div>
+            <div class="stat"><div class="v" id="sMast">0</div><div class="k">mastered</div></div>
+          </div>
+          <div>
+            <div class="lab" style="margin-bottom:6px">Concepts in the install</div>
+            <div class="chips" id="instChips" style="flex-wrap:wrap;overflow:visible"></div>
+          </div>
+          <div>
+            <div class="lab" style="margin-bottom:6px">Session length</div>
+            <div class="seg" id="lenSeg" role="group" aria-label="Session length" style="width:max-content">
+              <button data-len="8">8</button><button data-len="12" aria-pressed="true">12</button><button data-len="20">20</button>
+            </div>
+          </div>
+          <button class="bigbtn" id="startBtn">Start session</button>
+          <p class="note">New concepts open with a first look before any questions. A miss sends the card back to box 1 and repeats it later in the session. Progress is kept in this browser.</p>
+        </div>
+      </div>
+
+      <!-- card -->
+      <div class="panel bleed" id="instCard" hidden>
+        <div class="qtop">
+          <div class="bar"><i id="qBar" style="width:0%"></i></div>
+          <span class="qcount" id="qCount">1 / 12</span>
+          <button class="ghost" id="quitBtn" style="padding:6px 10px">End</button>
+        </div>
+        <div class="pbody" style="padding-top:0">
+          <div class="qtype" id="qType">Name the concept</div>
+          <div class="prompt" id="qPrompt"></div>
+        </div>
+        <div class="fieldwrap">
+          <canvas id="quizField" aria-label="Quiz diagram"></canvas>
+          <div class="f-tag" id="quizTag"></div>
+          <div class="f-drop" id="quizDrop">Top of drop</div>
+          <div class="f-clock"><span id="quizClock">0.00</span><small>sec post-snap</small></div>
+        </div>
+        <div id="qBody"></div>
+        <div id="qFeedback"></div>
+      </div>
+
+      <!-- summary -->
+      <div class="panel" id="instDone" hidden>
+        <div class="phead"><h3>Session complete</h3><span class="hint" id="doneHint"></span></div>
+        <div class="pbody" style="display:flex;flex-direction:column;gap:14px">
+          <div class="stats3">
+            <div class="stat"><div class="v" id="dRight">0</div><div class="k">first-try right</div></div>
+            <div class="stat"><div class="v" id="dWrong">0</div><div class="k">missed</div></div>
+            <div class="stat"><div class="v" id="dPct">0%</div><div class="k">accuracy</div></div>
+          </div>
+          <div id="dMisses"></div>
+          <button class="bigbtn" id="againBtn">Back to install</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PROGRESS ================= -->
+  <section id="v-progress" hidden>
+    <div class="install">
+      <div class="panel">
+        <div class="phead"><h3>Concept mastery</h3><span class="hint">Each bar is one card</span></div>
+        <div id="mastery"></div>
+        <div class="legend">
+          <span><i style="background:var(--panel-2)"></i>unseen</span>
+          <span><i style="background:var(--alert)"></i>box 1 (missed)</span>
+          <span><i style="background:var(--accent);opacity:.55"></i>learning</span>
+          <span><i style="background:var(--accent)"></i>box 4+ (mastered)</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phead"><h3>Accuracy by question</h3></div>
+        <div class="tblwrap">
+          <table class="timing" id="typeTbl">
+            <thead><tr><th>Question</th><th class="r">Right</th><th class="r">Missed</th><th class="r">Accuracy</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="pbody"><button class="ghost danger" id="resetBtn">Reset progress</button></div>
+      </div>
+    </div>
+  </section>
+  <p class="credit">NFL data: nflverse play-by-play and participation data, and FTN Data via nflverse (CC BY-SA 4.0), regular seasons 2023-2025.</p>
+</div>
+
+<script src="calib.js"></script>
+<script src="engine.js"></script>
+<script src="playbook.js"></script>
+<script src="defense.js"></script>
+<script src="play.js"></script>
+<script src="run.js"></script>
+<script src="rep.js"></script>
+<script src="drive.js"></script>
+<script src="app.js"></script>
+<script src="game.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</html>
