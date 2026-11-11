@@ -252,7 +252,7 @@ function fuzzOne() {
   // build 2: random personnel, and a share of game situations (red zone, goal line, two-minute)
   const pers = ["11", "12", "21", "10"][Math.floor(Math.random() * 4)];
   let sit;
-  if (Math.random() < 0.35) { const yl = 1 + Math.floor(Math.random() * 99), down = 1 + Math.floor(Math.random() * 4); sit = { down, togo: Math.max(1, Math.min(yl, 1 + Math.floor(Math.random() * 15))), yl, twoMin: Math.random() < 0.3 }; }
+  if (Math.random() < 0.35) { const yl = 1 + Math.floor(Math.random() * 99), down = 1 + Math.floor(Math.random() * 4); sit = { down, togo: down === 1 ? Math.min(10, yl) : Math.max(1, Math.min(yl, 1 + Math.floor(Math.random() * 15))), yl, twoMin: Math.random() < 0.3 }; }   // 1st down is always 10 or goal, as in drive.js
   const coord = Math.random() < 0.5 ? P.coordinator({ runs: Math.floor(Math.random() * 20), passes: Math.floor(Math.random() * 20) }) : null;
   const rep = new RP.Rep(level, ids, { personnel: pers, sit, coord });
   const avail = rep.available();
@@ -337,7 +337,8 @@ function fuzzOne() {
     ok(e.pC >= 0 && e.pC <= 1 && e.pInt >= 0 && e.pInt <= 1 && e.pInc >= -1e-9 && Math.abs(e.pC + e.pInt + e.pInc - 1) < 1e-6, "G: bad probabilities", { pC: e.pC, pI: e.pInt, pN: e.pInc });
     const flight = e.ta - rep.ball.tLeave;
     ok(flight > 0 && flight < 7.9, "G: catch-point search ran out", { flight, air: e.air });
-    ok(flight + 0.021 >= P.flightTime(e.air, e.type), "G: ball arrived faster than its flight time", { flight, ft: P.flightTime(e.air, e.type) });
+    const fd = e.how === "range" ? e.maxAir - 3 : e.air;   // an overthrow lands short of him, at maxAir - 3
+    ok(flight + 0.021 >= P.flightTime(fd, e.type), "G: ball arrived faster than its flight time", { flight, ft: P.flightTime(fd, e.type), how: e.how });
     ok(e.C.x >= 0.9 && e.C.x <= 52.5 && e.C.y > -12 && e.C.y < rep.rep.sit.yl + 10.5, "G: catch point off the field", { C: e.C });
     ok(Number.isInteger(e.gain) && e.gain <= rep.rep.sit.yl, "G: gain not an integer or past the goal", { g: e.gain, yl: rep.rep.sit.yl });
     if (R.kind === "complete" && R.gain > 40) agg.bigGain++;   // actual gain now comes from the simulated run, not the expectation

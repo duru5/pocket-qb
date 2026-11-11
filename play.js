@@ -361,12 +361,14 @@
     const P = ctx.sim.players[pos];
     const run = P.run;
     let ta = tLeave + 0.05, R = run.stateAt(ta);
-    for (; ta < tLeave + 8; ta += 0.02) {
+    // 12 s covers a touch ball to the far end line from the QB's own goal line (~9.5 s)
+    for (; ta < tLeave + 12; ta += 0.02) {
       R = run.stateAt(ta);
       if (ta - tLeave >= flightTime(Math.hypot(R.x - Q.x, R.y - Q.y), type)) break;
     }
     const Cp = { x: R.x, y: R.y };
-    const air = Math.hypot(Cp.x - Q.x, Cp.y - Q.y), flight = ta - tLeave;
+    const air = Math.hypot(Cp.x - Q.x, Cp.y - Q.y);
+    let flight = ta - tLeave;
 
     let reactAdj = 0;
     if (ctx.eye) { const de = Math.hypot(ctx.eye.x - Cp.x, ctx.eye.y - Cp.y); reactAdj = de < 6 ? -0.12 : (de > 12 ? 0.10 : 0); }
@@ -422,6 +424,9 @@
       how = inFront && canPick ? "int" : "breakup";
       point.c = 1;
     } else if (point && point.rem <= TIGHT) { how = "contested"; by = point; }
+    // an overthrow dies short of him (rep.js lands it at maxAir - 3): the play ends when it lands,
+    // not when it would have reached him
+    if (how === "range") { flight = flightTime(maxAir - 3, type); ta = tLeave + flight; }
     const pC = how === "catch" || how === "contested" ? 1 : 0, pInt = how === "int" ? 1 : 0, pInc = 1 - pC - pInt;
 
     const rac = how === "catch" ? runAfterCatch(ctx, pos, Cp, R, contest, "expected", air) : { yac: how === "contested" ? 0 : 0 };
