@@ -1,11 +1,12 @@
 """Browser stress test of Pocket QB at phone size: every control path, no console errors."""
-import asyncio, sys, json
+import asyncio, sys, json, os
 from playwright.async_api import async_playwright
 SP = sys.argv[1]
 HEAD = ('<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">'
         '<style>:root{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body>')
-open('/home/claude/pocket-qb/_p.html', 'w').write(HEAD + open('/home/claude/pocket-qb/index.html').read() + '</body></html>')
-URL = "file:///home/claude/pocket-qb/_p.html"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+open(os.path.join(ROOT, '_p.html'), 'w').write(HEAD + open(os.path.join(ROOT, 'index.html')).read() + '</body></html>')
+URL = "file://" + os.path.join(ROOT, "_p.html")
 results = []
 def check(cond, name, info=""):
     results.append((bool(cond), name, info))

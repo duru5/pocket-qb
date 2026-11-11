@@ -1,5 +1,5 @@
 /* Stress test for Pocket QB's rep state machine: scenario tests + random fuzz. */
-const path = "/home/claude/pocket-qb/";
+const path = require("path").join(__dirname, "..") + "/";
 const E = require(path + "engine.js"), B = require(path + "playbook.js"), D = require(path + "defense.js");
 const P = require(path + "play.js"), RP = require(path + "rep.js");
 const ALL = B.CONCEPTS.map(c => c.id);

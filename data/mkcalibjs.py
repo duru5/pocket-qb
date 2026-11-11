@@ -1,4 +1,4 @@
-import json
+import json, os
 d = json.load(open('calib.json'))
 d['throw'] = json.load(open('ftn_air.json'))   # FTN charting: catchable, contested, drop, completion by air yards
 js = '''/* Pocket calibration: tables built from nflverse NFL data (regular seasons 2023-2025):
@@ -12,4 +12,4 @@ js = '''/* Pocket calibration: tables built from nflverse NFL data (regular seas
   if (typeof module !== "undefined" && module.exports) module.exports = C;
 })(typeof globalThis !== "undefined" ? globalThis : this);
 ''' % json.dumps(d, separators=(',', ':'))
-open('/home/claude/pocket/calib.js', 'w').write(js); print(len(js))
+open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'calib.js'), 'w').write(js); print(len(js))
